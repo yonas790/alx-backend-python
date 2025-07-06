@@ -1,0 +1,22 @@
+# Ignore Python virtual environments
+alx-python-env/
+env/
+.alx-python-env/
+
+# Byte-compiled / cache files
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environment variables (like .env)
+.env
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# VS Code workspace settings
+.vscode/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
