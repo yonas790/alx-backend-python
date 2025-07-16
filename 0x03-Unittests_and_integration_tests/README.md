@@ -3,3 +3,4 @@
 ## 3. Parameterize and patch
 ## 4. Parameterize and patch as decorators
 ## 5. Mocking a property
+## 6. More patching
