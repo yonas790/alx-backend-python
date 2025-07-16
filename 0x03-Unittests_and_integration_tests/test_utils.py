@@ -12,8 +12,14 @@ class TestAccessNestedMap(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ({}, ("a",)),
-            ({"a": 1}, ("a", "b")),
+            (
+                {},
+                ("a",)
+            ),
+            (
+                {"a": 1},
+                ("a", "b"),
+            ),
         ]
     )
     def test_access_nested_map_exception(self, nested_map, path):
@@ -29,8 +35,14 @@ class TestGetJson(unittest.TestCase):
 
     @parameterized.expand(
         [
-            ("http://example.com", {"payload": True}),
-            ("http://holberton.io", {"payload": False}),
+            (
+                "http://example.com",
+                {"payload": True}
+            ),
+            (
+                "http://holberton.io",
+                {"payload": False}
+            ),
         ]
     )
     @patch("utils.requests.get")
