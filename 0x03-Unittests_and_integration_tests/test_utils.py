@@ -10,10 +10,12 @@ from utils import access_nested_map, get_json, memoize
 class TestAccessNestedMap(unittest.TestCase):
     """Test cases for access_nested_map."""
 
-    @parameterized.expand([
-        ({}, ("a",)),
-        ({"a": 1}, ("a", "b"))
-    ])
+    @parameterized.expand(
+        [
+            ({}, ("a",)),
+            ({"a": 1}, ("a", "b")),
+        ]
+    )
     def test_access_nested_map_exception(self, nested_map, path):
         """Test that access_nested_map raises KeyError for invalid path."""
         with self.assertRaises(KeyError) as cm:
@@ -25,11 +27,13 @@ class TestAccessNestedMap(unittest.TestCase):
 class TestGetJson(unittest.TestCase):
     """Test the utils.get_json function ensuring correct output and proper mocking."""
 
-    @parameterized.expand([
-        ("http://example.com", {"payload": True}),
-        ("http://holberton.io", {"payload": False}),
-    ])
-    @patch('utils.requests.get')
+    @parameterized.expand(
+        [
+            ("http://example.com", {"payload": True}),
+            ("http://holberton.io", {"payload": False}),
+        ]
+    )
+    @patch("utils.requests.get")
     def test_get_json(self, test_url, test_payload, mock_get):
         """Test get_json returns expected payload and calls requests.get once."""
         mock_response = Mock()
@@ -60,7 +64,7 @@ class TestMemoize(unittest.TestCase):
 
         with patch.object(
             test_obj,
-            'a_method',
+            "a_method",
             wraps=test_obj.a_method
         ) as mocked_method:
             # Call a_property twice
