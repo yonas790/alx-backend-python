@@ -3,7 +3,8 @@
 
 import unittest
 from parameterized import parameterized
-from unittest.mock import patch, PropertyMock
+from parameterized import parameterized_class
+from unittest.mock import patch, PropertyMock, Mock
 from client import GithubOrgClient
 from unittest import TestCase
 
@@ -95,3 +96,49 @@ class TestGithubOrgClient(unittest.TestCase):
         """Test that has_license returns correct boolean based on license key"""
         result = GithubOrgClient.has_license(repo, license_key)
         self.assertEqual(result, expected)
+
+
+@parameterized_class([
+    {
+        "org_payload": org_payload,
+        "repos_payload": repos_payload,
+        "expected_repos": expected_repos,
+        "apache2_repos": apache2_repos
+    }
+])
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """Integration test class for GithubOrgClient.public_repos"""
+
+    @classmethod
+    def setUpClass(cls):
+        """Set up patcher for requests.get"""
+        cls.get_patcher = patch("requests.get")
+
+        # Start patcher and store the mock
+        cls.mock_get = cls.get_patcher.start()
+
+        # Define the side effect of .json() depending on call order
+        cls.mock_get.return_value = Mock()
+        cls.mock_get.return_value.json.side_effect = [
+            cls.org_payload,
+            cls.repos_payload
+        ]
+
+    @classmethod
+    def tearDownClass(cls):
+        """Stop the patcher"""
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """Test public_repos returns expected repo names"""
+        client = GithubOrgClient("google")
+        self.assertEqual(client.public_repos(), self.expected_repos)
+
+    def test_public_repos_with_license(self):
+        """Test public_repos filters repos by license"""
+        client = GithubOrgClient("google")
+        self.assertEqual(
+            client.public_repos(license="apache-2.0"),
+            self.apache2_repos
+        )
+

@@ -5,3 +5,4 @@
 ## 5. Mocking a property
 ## 6. More patching
 ## 7. Parameterize
+## 8. Integration test: fixtures
