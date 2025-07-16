@@ -6,3 +6,4 @@
 ## 6. More patching
 ## 7. Parameterize
 ## 8. Integration test: fixtures
+## 9. Integration tests
