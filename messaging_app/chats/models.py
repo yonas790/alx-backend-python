@@ -2,45 +2,39 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
-# ENUM choices
-USER_ROLES = (
-    ('guest', 'Guest'),
-    ('host', 'Host'),
-    ('admin', 'Admin'),
-)
-
-# 1. Custom User model
+# Custom User model extending AbstractUser
 class User(AbstractUser):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
-    email = models.EmailField(unique=True, null=False)
+    user_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email = models.EmailField(unique=True)
+    role = models.CharField(
+        max_length=10,
+        choices=[('guest', 'Guest'), ('host', 'Host'), ('admin', 'Admin')],
+        default='guest'
+    )
     phone_number = models.CharField(max_length=20, null=True, blank=True)
-    role = models.CharField(max_length=10, choices=USER_ROLES, default='guest')
+    created_at = models.DateTimeField(auto_now_add=True)
 
-    # Remove username field if you want email-based login
-    username = None
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
-
-    created_at = models.DateTimeField(auto_now_add=True)
+    REQUIRED_FIELDS = ['username', 'first_name', 'last_name']
 
     def __str__(self):
-        return f"{self.email} ({self.role})"
+        return self.email
 
-# 2. Conversation Model — links multiple users (many-to-many)
+# Conversation model with many-to-many relation to User
 class Conversation(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
-    participants = models.ManyToManyField(User, related_name='conversations')  # many-to-many
+    conversation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    participants = models.ManyToManyField(User, related_name='conversations')
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"Conversation {self.id}"
+        return f"Conversation {self.conversation_id}"
 
-# 3. Message Model — belongs to one conversation and one sender (user)
+# Message model linking sender and conversation
 class Message(models.Model):
-    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False, db_index=True)
+    message_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
     conversation = models.ForeignKey(Conversation, on_delete=models.CASCADE, related_name='messages')
-    message_body = models.TextField(null=False)
+    message_body = models.TextField()
     sent_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
