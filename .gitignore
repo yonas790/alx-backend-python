@@ -21,3 +21,6 @@ __pycache__/
 # OS-specific files
 .DS_Store
 Thumbs.db
+
+# DB
+db.sqlite3
