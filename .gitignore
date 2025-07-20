@@ -1,6 +1,7 @@
 # Ignore Python virtual environments
 alx-python-env/
 env/
+.venv/
 .alx-python-env/
 myenv/
 
