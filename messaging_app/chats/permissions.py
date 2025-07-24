@@ -14,13 +14,17 @@ class IsParticipant(permissions.BasePermission):
         return False
     
 
-class IsParticipantOfConversation(permissions.BasePermission):
+from rest_framework.permissions import BasePermission, SAFE_METHODS
+
+class IsParticipantOfConversation(BasePermission):
     """
-    Custom permission to only allow participants of a conversation to access it.
+    ✅ Allows only participants of a conversation to access it.
+    ✅ Supports read (GET), create (POST), update (PUT/PATCH), delete (DELETE).
     """
 
     def has_object_permission(self, request, view, obj):
-        return request.user in obj.participants.all()
-    
-    def has_permission(self, request, view):
-        return request.user.is_authenticated
+        # 👇 Safe methods are usually GET, HEAD, OPTIONS
+        if request.method in SAFE_METHODS or request.method in ['POST', 'PUT', 'PATCH', 'DELETE']:
+            # ✅ Checks if the user is part of the conversation (sender or receiver)
+            return request.user == obj.sender or request.user == obj.receiver
+        return False

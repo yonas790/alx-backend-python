@@ -1,18 +1,18 @@
 from rest_framework import viewsets, status, filters
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
-from .models import Conversation, Message, User
-from .serializers import ConversationSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
 from rest_framework.permissions import IsAuthenticated
-from .permissions import IsParticipant 
+from .permissions import IsParticipant
+from .models import Conversation, Message, User
+from .serializers import ConversationSerializer, MessageSerializer
 
 class ConversationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipant]
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
-    filterset_fields = ['participants__user_id']  # filter by participant user_id
+    filterset_fields = ['participants__user_id']
     search_fields = ['conversation_id']
     ordering_fields = ['created_at']
 
@@ -33,12 +33,17 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipant]
-    queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['conversation__conversation_id', 'sender__user_id']
     search_fields = ['message_body']
     ordering_fields = ['sent_at']
+
+    def get_queryset(self):
+        # Filter messages to only those in conversations where the request user is a participant
+        user = self.request.user
+        # Assuming your User model is linked to request.user, else adjust accordingly
+        return Message.objects.filter(conversation__participants=user)
 
     def create(self, request, *args, **kwargs):
         conversation_id = request.data.get('conversation')
@@ -53,6 +58,14 @@ class MessageViewSet(viewsets.ModelViewSet):
 
         conversation = get_object_or_404(Conversation, conversation_id=conversation_id)
         sender = get_object_or_404(User, user_id=sender_id)
+
+        # Permission check: sender must be a participant of the conversation
+        if not conversation.participants.filter(pk=sender.pk).exists():
+            return Response(
+                {"error": "Sender must be a participant of the conversation."},
+                status=status.HTTP_403_FORBIDDEN
+            )
+
         message = Message.objects.create(
             conversation=conversation,
             sender=sender,
@@ -60,3 +73,17 @@ class MessageViewSet(viewsets.ModelViewSet):
         )
         serializer = self.get_serializer(message)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
+
+    def update(self, request, *args, **kwargs):
+        message = self.get_object()
+        # Permission check: only sender can update the message
+        if message.sender != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        message = self.get_object()
+        # Permission check: only sender can delete the message
+        if message.sender != request.user:
+            return Response(status=status.HTTP_403_FORBIDDEN)
+        return super().destroy(request, *args, **kwargs)
