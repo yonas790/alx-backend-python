@@ -4,8 +4,11 @@ from django_filters.rest_framework import DjangoFilterBackend
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
 from django.shortcuts import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
+from .permissions import IsParticipant 
 
 class ConversationViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsParticipant]
     queryset = Conversation.objects.all()
     serializer_class = ConversationSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
@@ -29,6 +32,7 @@ class ConversationViewSet(viewsets.ModelViewSet):
 
 
 class MessageViewSet(viewsets.ModelViewSet):
+    permission_classes = [IsAuthenticated, IsParticipant]
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
