@@ -6,6 +6,8 @@ from rest_framework.permissions import IsAuthenticated
 from .permissions import IsParticipant
 from .models import Conversation, Message, User
 from .serializers import ConversationSerializer, MessageSerializer
+from .pagination import MessagePagination
+from .filters import MessageFilter
 
 class ConversationViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipant]
@@ -13,8 +15,10 @@ class ConversationViewSet(viewsets.ModelViewSet):
     serializer_class = ConversationSerializer
     filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['participants__user_id']
-    search_fields = ['conversation_id']
-    ordering_fields = ['created_at']
+    search_fields = ['conversation_id', 'message_body']
+    ordering_fields = ['created_at', 'sent_at']
+    filterset_class = MessageFilter
+    pagination_class = MessagePagination
 
     def create(self, request, *args, **kwargs):
         participants_ids = request.data.get('participants', [])
@@ -30,6 +34,9 @@ class ConversationViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(conversation)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
+    def get_queryset(self):
+        user = self.request.user
+        return Message.objects.filter(conversation__participants=user)
 
 class MessageViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsParticipant]
