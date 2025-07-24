@@ -20,6 +20,10 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+    
+    @property
+    def id(self):
+        return self.user_id
 
 # Conversation model with many-to-many relation to User
 class Conversation(models.Model):

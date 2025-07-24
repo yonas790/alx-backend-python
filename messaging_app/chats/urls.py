@@ -5,6 +5,7 @@ from .views import ConversationViewSet, MessageViewSet
 # Main router
 router = DefaultRouter()
 router.register(r'conversations', ConversationViewSet, basename='conversation')
+router.register(r'messages', MessageViewSet, basename='message')
 
 # Nested router for messages under conversations
 conversations_router = NestedDefaultRouter(router, r'conversations', lookup='conversation')

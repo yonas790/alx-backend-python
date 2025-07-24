@@ -69,6 +69,8 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
+    'USER_ID_FIELD': 'user_id',  # <-- Important: User model primary key field name
+    'USER_ID_CLAIM': 'user_id',  # optional, the claim name inside the JWT token payload
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': True,
