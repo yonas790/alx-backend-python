@@ -71,3 +71,26 @@ class OffensiveLanguageMiddleware:
         if x_forwarded_for:
             return x_forwarded_for.split(',')[0]
         return request.META.get('REMOTE_ADDR')
+    
+class RolePermissionMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        """
+        Allow only users with role 'admin' or 'moderator'.
+        Blocks all other users for protected actions.
+        """
+        # Only check for authenticated users
+        if request.user.is_authenticated:
+            # Here we assume the User model has a field named `role`
+            # Adjust attribute name if your model uses something else
+            user_role = getattr(request.user, "role", None)
+
+            # Check for disallowed roles
+            if user_role not in ("admin", "moderator"):
+                # Optionally, you can restrict this to certain paths:
+                # if request.path.startswith("/chats/"):
+                return HttpResponseForbidden("You do not have permission to perform this action.")
+
+        return self.get_response(request)
