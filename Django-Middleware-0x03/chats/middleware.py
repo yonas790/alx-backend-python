@@ -72,7 +72,7 @@ class OffensiveLanguageMiddleware:
             return x_forwarded_for.split(',')[0]
         return request.META.get('REMOTE_ADDR')
     
-class RolePermissionMiddleware:
+class RolepermissionMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
 
