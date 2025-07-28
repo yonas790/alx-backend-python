@@ -10,15 +10,12 @@ User = get_user_model()
 @login_required
 def threaded_conversations(request):
     """
-    Fetch all messages where the logged-in user is either sender or receiver.
+    Fetch all messages where the logged-in user is the sender.
     Use select_related and prefetch_related to optimize queries.
-    Retrieve threaded replies recursively.
     """
-    user = request.user
-
     # Fetch top-level messages (no parent) involving this user
     top_messages = Message.objects.filter(
-        sender=user
+        sender=request.user
     ).select_related('sender', 'receiver').prefetch_related('replies')
 
     # Recursive helper function to get replies nested
@@ -37,7 +34,6 @@ def threaded_conversations(request):
         })
 
     return render(request, 'messaging/threaded.html', {'threads': threads})
-
 
 
 @require_POST
