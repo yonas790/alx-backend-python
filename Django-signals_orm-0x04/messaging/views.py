@@ -50,13 +50,16 @@ def delete_user(request):
 
 
 @login_required
+@login_required
 def unread_inbox(request):
     """
     Display unread messages for the logged-in user using custom manager.
     """
-    unread_messages = Message.unread.unread_for_user(request.user)
+    # Use the custom manager and chain .only() explicitly
+    unread_messages = Message.unread.unread_for_user(request.user).only(
+        'id', 'sender', 'receiver', 'content', 'timestamp'
+    )
 
     return render(request, 'messaging/unread_inbox.html', {
         'messages': unread_messages
     })
-
