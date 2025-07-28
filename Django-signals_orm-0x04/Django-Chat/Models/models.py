@@ -3,14 +3,20 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
-
 class Message(models.Model):
     sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
     receiver = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     content = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    # New fields to track edits
+    parent_message = models.ForeignKey(
+        'self',
+        null=True,
+        blank=True,
+        related_name='replies',
+        on_delete=models.CASCADE
+    )
+
     edited = models.BooleanField(default=False)
     edited_at = models.DateTimeField(null=True, blank=True)
     edited_by = models.ForeignKey(
@@ -22,7 +28,8 @@ class Message(models.Model):
     )
 
     def __str__(self):
-        return f"{self.sender} -> {self.receiver} ({'edited' if self.edited else 'new'})"
+        prefix = f"Reply to {self.parent_message.id}" if self.parent_message else "Message"
+        return f"{prefix} from {self.sender} to {self.receiver} at {self.timestamp}"
 
 
 class MessageHistory(models.Model):
