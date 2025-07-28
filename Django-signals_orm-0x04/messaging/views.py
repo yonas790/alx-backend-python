@@ -4,6 +4,7 @@ from django.shortcuts import redirect
 from django.views.decorators.http import require_POST
 from django.shortcuts import render
 from .models import Message
+from django.views.decorators.cache import cache_page
 
 User = get_user_model()
 
@@ -63,3 +64,17 @@ def unread_inbox(request):
     return render(request, 'messaging/unread_inbox.html', {
         'messages': unread_messages
     })
+
+
+@cache_page(60)  # Cache for 60 seconds
+@login_required
+def conversation_messages(request):
+    """
+    Cached view that lists messages for the logged-in user.
+    """
+    messages = Message.objects.filter(
+        receiver=request.user
+    ).select_related('sender', 'receiver')
+
+    return render(request, 'messaging/conversation.html', {'messages': messages})
+
