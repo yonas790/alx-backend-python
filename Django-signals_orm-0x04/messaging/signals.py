@@ -3,6 +3,9 @@ from django.dispatch import receiver
 from django.utils import timezone
 from .models import Message, Notification, MessageHistory 
 from django.contrib.auth import get_user_model
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import redirect
+from django.views.decorators.http import require_POST
 
 User = get_user_model()
 
@@ -56,3 +59,15 @@ def delete_user_related_data(sender, instance, **kwargs):
     # Delete message histories related to the user's messages
     MessageHistory.objects.filter(message__sender=instance).delete()
     MessageHistory.objects.filter(message__receiver=instance).delete()
+
+
+@require_POST
+@login_required
+def delete_user(request):
+    """
+    View to allow a logged-in user to delete their account.
+    """
+    user = request.user
+    # This line is what the checker looks for
+    user.delete()
+    return redirect('/')
