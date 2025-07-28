@@ -47,3 +47,16 @@ def delete_user(request):
     user.delete()
     # Redirect to home or login page after deletion
     return redirect('/')
+
+
+@login_required
+def unread_inbox(request):
+    """
+    Display unread messages for the logged-in user using custom manager.
+    """
+    unread_messages = Message.unread.unread_for_user(request.user)
+
+    return render(request, 'messaging/unread_inbox.html', {
+        'messages': unread_messages
+    })
+
