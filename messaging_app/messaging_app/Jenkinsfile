@@ -8,11 +8,9 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git(
+                git branch: 'main',
                     url: 'https://github.com/alx-backend-python/messaging_app.git',
-                    branch: 'main',
                     credentialsId: 'github-creds'
-                )
             }
         }
 
