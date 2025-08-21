@@ -1,10 +1,6 @@
 pipeline {
     agent any
 
-    tools {
-        python 'Python3'  
-    }
-
     stages {
         stage('Checkout') {
             steps {
@@ -17,8 +13,8 @@ pipeline {
         stage('Setup Python Env') {
             steps {
                 sh 'python3 -m venv venv'
-                sh '. venv/bin/activate && pip install --upgrade pip'
-                sh '. venv/bin/activate && pip install -r requirements.txt'
+                sh '. venv/bin/activate && pip3 install --upgrade pip'
+                sh '. venv/bin/activate && pip3 install -r messaging_app/requirements.txt'
             }
         }
 
@@ -35,6 +31,6 @@ pipeline {
     }
 
     triggers {
-        // No auto triggers, pipeline runs manually
+        // Manual trigger only
     }
 }
