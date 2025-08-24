@@ -19,6 +19,6 @@ spec:
     spec:
       containers:
         - name: messaging-app
-          image: yonas/messaging-app:blue # old version
+          image: yonas/messaging-app:blue 
           ports:
             - containerPort: 8000
